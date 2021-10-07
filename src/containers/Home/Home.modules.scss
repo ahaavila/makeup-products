@@ -1,0 +1,142 @@
+.App {
+  text-align: center;
+  width: 100vw;
+  padding-top: 1rem;
+}
+
+.card-container {
+  display: flex;
+  flex-wrap: wrap;
+  max-width: 90%;
+  margin: 1rem auto;
+
+  .card-makeup {
+    width: 48%;
+    height: 20rem;
+    border: 1px solid rgb(199, 199, 199);
+    margin-left: 1rem;
+    margin-bottom: 1rem;
+    display: flex;
+  
+    .card-img {
+      width: 40%;
+      height: 100%;
+      border-right: 1px solid rgb(199, 199, 199);
+  
+      img {
+        max-width: 100%;
+        max-height: 100%;
+      }
+    }
+  
+    .card-details {
+      padding: 2rem;
+      text-align: left;
+      width: 60%;
+
+      position: relative;
+
+      .card-price {
+        font-size: 1.2rem;
+        margin-top: 1rem;
+        font-weight: bold;
+      }
+    }
+  
+    button {
+      background: gray;
+      color: #fff;
+      width: 8rem;
+      height: 2.5rem;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      border: none;
+      
+      position: absolute;
+      bottom: 1rem;
+  
+      &:hover {
+        background: rgb(174, 174, 174);
+      }
+    }
+  }
+}
+
+.Pagination_Container {
+  height: 56px;
+  min-height: 56px;
+  display: flex;
+  justify-content: flex-end;
+  border-top: 1px solid rgba(224, 224, 224, 1);
+}
+
+.pagination {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  padding-left: 0;
+  border-radius: 4px;
+}
+.pagination > li {
+  display: inline;
+}
+.pagination > li > a,
+.pagination > li > span {
+  position: relative;
+  float: left;
+  padding: 6px 12px;
+  line-height: 1.42857143;
+  text-decoration: none;
+  color: rgba(0, 0, 0, 0.54);
+  background-color: #fff;
+  border: 1px solid #ddd;
+  margin-left: -1px;
+}
+.pagination > li:first-child > a,
+.pagination > li:first-child > span {
+  margin-left: 0;
+  border-bottom-left-radius: 4px;
+  border-top-left-radius: 4px;
+}
+.pagination > li:last-child > a,
+.pagination > li:last-child > span {
+  border-bottom-right-radius: 4px;
+  border-top-right-radius: 4px;
+}
+.pagination > li > a:focus,
+.pagination > li > a:hover,
+.pagination > li > span:focus,
+.pagination > li > span:hover {
+  z-index: 2;
+  color: rgba(0, 0, 0, 0.8);
+  background-color: #eee;
+  border-color: #ddd;
+}
+.pagination > .active > a,
+.pagination > .active > a:focus,
+.pagination > .active > a:hover,
+.pagination > .active > span,
+.pagination > .active > span:focus,
+.pagination > .active > span:hover {
+  z-index: 3;
+  color: #fff;
+  background-color: #767676;
+  border-color: #494848;
+  cursor: default;
+}
+.pagination > .disabled > a,
+.pagination > .disabled > a:focus,
+.pagination > .disabled > a:hover,
+.pagination > .disabled > span,
+.pagination > .disabled > span:focus,
+.pagination > .disabled > span:hover {
+  color: #777;
+  background-color: #fff;
+  border-color: #ddd;
+  cursor: not-allowed;
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
