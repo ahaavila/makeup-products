@@ -11,10 +11,6 @@ const initialState = {
   product: [],
   loadingProduct: false,
   errorLoadingProduct: null,
-
-  productsSearched: [],
-  loadingProductsSearched: false,
-  errorLoadingProductsSearched: null,
 }
 
 export const productsReducer = (state = initialState, action) => {
@@ -32,13 +28,6 @@ export const productsReducer = (state = initialState, action) => {
         product: action.payload,
         loadingProduct: false,
         errorLoadingProduct: null,
-      }
-    case types.SEARCH_BY_TAG:
-      return {
-        ...state,
-        productsSearched: action.payload,
-        loadingProductsSearched: false,
-        errorLoadingProductsSearched: null,
       }
     default:
       return state
