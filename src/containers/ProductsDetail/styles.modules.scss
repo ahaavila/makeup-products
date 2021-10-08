@@ -1,0 +1,24 @@
+.product-row {
+  display: flex;
+  margin: 5rem auto;
+  width: 90vw;
+
+  .image-col {
+    display: flex;
+    justify-content: space-evenly;
+
+    img {
+      width: 60%;
+    }
+  }
+
+  .brand-category {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .price-row {
+    font-size: 1.5rem;
+    font-weight: bold;
+  }
+}
