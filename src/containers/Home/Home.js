@@ -4,7 +4,7 @@ import { useHistory } from 'react-router-dom';
 import ModalDefault from '../../components/ModalDefault/ModalDefault';
 import { Row, Col, Card, Container, Button } from 'react-bootstrap';
 import PaginationComponent from 'react-js-pagination';
-import { fetchProducts, setProduct, searchByTag } from '../../store/actions/productsAction';
+import { fetchProducts, setProduct } from '../../store/actions/productsAction';
 import api from '../../api/api';
 
 import './Home.modules.scss';
@@ -14,11 +14,11 @@ function Home() {
   const [showingProducts, setShowingProducts] = useState();
   const [pageActive, setPageActive] = useState(1);
   const [openModalImage, setOpenModalImage] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
   const dispatch = useDispatch();
   const { products } = useSelector((state) => state.products.products);
   const { firstProducts } = useSelector((state) => state.products.products);
-  const { productsSearched } = useSelector((state) => state.products);
 
   const history = useHistory();
 
@@ -71,20 +71,6 @@ function Home() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [firstProducts.length > 0]);
 
-  // useEffect(() => {
-  //   setAllProducts(productsSearched);
-  //   setShowingProducts();
-  //   const newArray = [];
-  //   const lastProduct = 23;
-  //   const firstProduct = 0;
-  //   console.log(lastProduct, firstProduct);
-  //   for (let i = firstProduct; i <= lastProduct; i++) {
-  //     newArray.push(productsSearched[i]);
-  //   }
-  //   console.log(newArray);
-  //   setShowingProducts(newArray)
-  // }, [productsSearched.length > 0]);
-
   const handlePageChange = (page) => {
     console.log(page);
     const newArray = [];
@@ -102,8 +88,9 @@ function Home() {
     <div className="Pagination_Container">
       <PaginationComponent
         activePage={pageActive}
-        totalItemsCount={products?.length}
+        totalItemsCount={allProducts?.length > 0 ? allProducts?.length : 0}
         onChange={handlePageChange}
+        itemsCountPerPage={24}
       />
     </div>
   )
@@ -113,10 +100,6 @@ function Home() {
     history.push(`/product/${product.id}`);
   }
 
-  console.log(showingProducts);
-  console.log(products);
-  console.log(firstProducts);
-
   const handleClickOpenModal = (product) => {
     localStorage.setItem('product', JSON.stringify(product));
     setOpenModalImage(true);
@@ -124,92 +107,102 @@ function Home() {
 
   const renderModal = () => {
     const product = JSON.parse(localStorage.getItem('product'));
-    console.log(product);
     return (
-      <div  className="modal-wrapper" style={{ display: "flex", justifyContent: 'flex-start' }}>
-        <div className="modal-content" style={{ height: '60%', overflow: 'auto'}}>
-          <div className="modal-close-button" onClick={() => setOpenModalImage(false)}>{"\u00D7"}
-          </div>
-          <div style={{ minWidth: '65%', maxHeight: '50vh', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <img src={product.api_featured_image} alt={product.name} style={{ width: '100%', maxHeight: '80%' }} />
-            <p style={{ marginTop: '1rem' }}>{product.name}</p>
-          </div>
-        </div>
-      </div>
+      <ModalDefault 
+        modalType="MODAL_IMAGE"
+        closeModal={() => setOpenModalImage(false)}
+        isModalOpen={openModalImage}
+      >
+        <img src={product.api_featured_image} alt={product.name} style={{ width: '100%', maxHeight: '80%' }} />
+        <p style={{ marginTop: '1rem' }}>{product.name}</p>
+      </ModalDefault>
     )
   }
   const handleRatingChange = async(e) => {
+    var page = 1;
+    var lastProduct = 0;
+    var firstProduct = 0;
     if (e.target.value === 'desc') {
-      var descending = await products.sort((a,b) => a.rating < b.rating ? -1 : a.rating > b.rating ? 1 : 0).reverse();
+      var descending = await allProducts.sort((a,b) => a.rating < b.rating ? -1 : a.rating > b.rating ? 1 : 0).reverse();
       setAllProducts(descending);
       if (descending.length > 0) {
         
         const newArray = [];
-        const lastProduct = 23;
-        const firstProduct = 0;
-        console.log(lastProduct, firstProduct);
+        if (descending.length < 24) {
+          lastProduct = (page * descending.length) - 1;
+          firstProduct = (page - 1) * descending.length;
+        } else {
+          lastProduct = (page * 24) - 1;
+          firstProduct = (page - 1) * 24;
+        }
         for (let i = firstProduct; i <= lastProduct; i++) {
           newArray.push(descending[i]);
         }
-        console.log(newArray);
         setShowingProducts(newArray)
       }
     } else {
-      var ascending = await products.sort((a,b) => a.rating < b.rating ? -1 : a.rating > b.rating ? 1 : 0);
+      var ascending = await allProducts.sort((a,b) => a.rating < b.rating ? -1 : a.rating > b.rating ? 1 : 0);
       setAllProducts(ascending);
       if (ascending.length > 0) {
         
         const newArray = [];
-        const lastProduct = 23;
-        const firstProduct = 0;
-        console.log(lastProduct, firstProduct);
+        if (ascending.length < 24) {
+          lastProduct = (page * ascending.length) - 1;
+          firstProduct = (page - 1) * ascending.length;
+        } else {
+          lastProduct = (page * 24) - 1;
+          firstProduct = (page - 1) * 24;
+        }
         for (let i = firstProduct; i <= lastProduct; i++) {
           newArray.push(ascending[i]);
         }
-        console.log(newArray);
         setShowingProducts(newArray)
       }
     }
   }
 
   const handleFilterChange = async(e) => {
-    // dispatch(searchByTag(e.target.value));
-    // dispatch(fetchProducts(e.target.value));
-    // console.log(productsSearched);
-    const response = await api.get(`product_tags=${e.target.value}`);
+    setShowModal(true);
+    const response = await api.get(`products.json?product_tags=${e.target.value}`);
     const newArray = [];
-    const lastProduct = 23;
-    const firstProduct = 0;
-    console.log(lastProduct, firstProduct);
+    const page = 1
+    var lastProduct = 0;
+    var firstProduct = 0;
+    if (response.data.length < 24) {
+      lastProduct = (page * response.data.length) - 1;
+      firstProduct = (page - 1) * response.data.length;
+    } else {
+      lastProduct = (page * 24) - 1;
+      firstProduct = (page - 1) * 24;
+    }
     for (let i = firstProduct; i <= lastProduct; i++) {
       newArray.push(response.data[i]);
     }
-    console.log(newArray);
     setShowingProducts(newArray);
     setAllProducts(response.data);
     localStorage.setItem('productFiltered', JSON.stringify(response.data));
     localStorage.setItem('productFilteredFirstPage', JSON.stringify(newArray));
+    setShowModal(false);
   }
-
-  console.log(showingProducts);
-  // console.log(productsSearched);
 
   return (
     <Container>
-      <h1 style={{ textAlign: 'center', padding: '1rem' }}>Makeup Products</h1>
+      <h1 className="title">Makeup Products</h1>
       {showingProducts?.length === 0 ? <ModalDefault modalType="MODAL_LOADING"/> : null }
+      {showModal ? <ModalDefault modalType="MODAL_LOADING"/> : null }
 
       <Row className="mb-3">
         <Col>
           <span>Filter by tags: </span>
           <select name="filter" id="filter" onChange={(e) => handleFilterChange(e)}>
-            {tags.map(tag => (
-              <option value={tag}>{tag}</option>
+            <option value="">Select a tag ...</option>
+            {tags.map((tag, index)=> (
+              <option value={tag} key={index}>{tag}</option>
             ))}
           </select>
         </Col>
-        <Col md={{ span: 5, offset: 10 }}>
-          <span style={{ marginRight: '1rem' }}>Sort by rating: </span>
+        <Col className="col-sort-by">
+          <span>Sort by rating: </span>
           <select name="rating" id="rating" onChange={(e) => handleRatingChange(e)}>
             <option value="asc">ascending</option>
             <option value="desc">descending</option>
@@ -220,20 +213,24 @@ function Home() {
       <Row lg={4} md={3} sm={2} xs={1} className="g-4">
           {showingProducts?.length > 0 &&
           showingProducts?.map(product => (
-            <Col key={product.id}>
-              <Card>
-                <div style={{ display: 'flex', justifyContent: 'center', height: '60%' }}>
-                  <Card.Img onClick={() => handleClickOpenModal(product)} variant="left" src={product.api_featured_image} className="card-img" style={{ maxHeight: '19rem', width: 'auto', cursor: 'pointer' }} />
+            <Col key={product?.id}>
+              <Card className="card-container">
+                <div className="div-image">
+                  <Card.Img onClick={() => handleClickOpenModal(product)} variant="left" src={product?.api_featured_image} className="card-img" style={{ maxHeight: '19rem', width: 'auto', cursor: 'pointer' }}/>
                 </div>
                 {openModalImage && renderModal()}
                 <Card.Body>
-                  <Card.Title style={{ fontSize: '1rem' }}><b>{product.name}</b></Card.Title>
-                  <Card.Text><b>{product.price_sign} {product.price}</b></Card.Text>
-                  <Card.Text>Rating: {product.rating || 0}</Card.Text>
+                  <Card.Title className="card-text-title"><b>{product?.name}</b></Card.Title>
+                  <Row>
+                    <Card.Text><b>{product?.price_sign} {product?.price}</b></Card.Text>
+                  </Row>
+                  <Row>
+                    <Card.Text>Rating: {(product?.rating * 100) / 5 || 0}</Card.Text>
+                  </Row>
                   <Row className="mt-5">
                     <div>
                       <span>Colors: </span>
-                      <select name="colors" id="colors" style={{ width: '5rem' }}>
+                      <select name="colors" id="colors" className="select-colors">
                         {product?.product_colors.map((color, index) => (
                           <option value={color.hex_value} key={index} style={{ background: `${color.hex_value}` }}>
                             
